@@ -58,7 +58,7 @@ Createnv reads the sample file and separate lines in blocks, splitting at empty 
 
 The first line of the block should start with a `#` character, followed by a space. The title value is the remaining text after the `#` and space.
 
-For example:
+#### Example
 
 ```
 # Hell Yeah!
@@ -78,11 +78,11 @@ There are three types of variables:
 
 Each block might one or more variable lines. The syntax requires a _name of variable_ using only capital letters, numbers, or underscore, followed by an equal sign.
 
-What comes after the equal sign is _optinal_. This text is considered the default value of this variable.
+What comes after the equal sign is _optional_. This text is considered the default value of this variable.
 
-The human description of this variable is also _optional_. You can create one by using comment at the end of the line.  That is to say, any text after a sequence of two spaces, followed by the `#` sign and one extra space, is the human description of that variable.
+The human description of this variable is also _optional_. You can create one by placing a comment at the end of the line.  That is to say, any text after a sequence of **two spaces, followed by the `#` sign and one extra space**, is the human description of that variable.
 
-For example:
+##### Example
 
 ```
 NAME=
@@ -106,24 +106,24 @@ Now it's a complete variable with a name (_NAME_), a default value (_Cuducos_), 
 
 If you want to have a variable with a random value, you can set its default value to `<random>` and Createnv will take care of it. Optionally you can specify how long this variable should be with `:int`.
 
-For example:
+You can use the [`--chars-for-random-string` option](#options) to specify which characters to be used in the random value.
+
+##### Example
 
 ```
 SECRET_KEY=<random>
 TOKEN=<random:32>
 ```
 
-The first line will create a `SECRET_VALUE` with random characters and random length (starting at 64 chars).
+The first line will create a `SECRET_VALUE` with random characters and random length between 64 and 128 chars.
 
 The second line will create a `TOKEN` with random value and with exactly 32 characters.
 
-You can use the [`--chars-for-random-string` option](#options) to specify which characters to be used.
-
 #### Auto generated
 
-Finally, you can combine existing variables _within the same block_ to create a new variable (without prompting your user to combine them).
+Finally, you can combine existing variables _within the same block_ to create a new variable (without prompting your user to combine them), the syntax is similar to f-strings in Python..
 
-For example, let's say you want to greet someone:
+##### Example
 
 ```
 NAME=  # What is your name?
