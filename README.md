@@ -18,7 +18,7 @@ Using the sample `.env.sample` in this repository:
 
 [![asciicast](https://asciinema.org/a/311482.svg)](https://asciinema.org/a/311482)
 
-You can now experiment by yourself, or try more advanced `.env.sample` such as the `tests/.env.sample` or [Bot Followers's `.env.sample`]
+You can now experiment by yourself, or try more advanced `.env.sample` such as the `tests/.env.sample` or [Bot Followers's `.env.sample`](https://github.com/cuducos/bot-followers/blob/master/.env.sample).
 
 ## Install
 
