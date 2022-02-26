@@ -8,12 +8,12 @@ jobs:
       - name: Install dependencies
         uses: abatilo/actions-poetry@v1.5.0
         with:
-          python_version: 3.7
-          poetry_version: 1.0.5
+          python_version: 3.9
+          poetry_version: 1.1.12
           args: install
       - name: Run tests
         uses: abatilo/actions-poetry@v1.5.0
         with:
-          python_version: 3.7
-          poetry_version: 1.0.5
+          python_version: 3.9
+          poetry_version: 1.1.12
           args: run pytest
