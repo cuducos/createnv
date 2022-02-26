@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "createnv"
-version = "0.0.1"
+version = "0.0.2"
 description = "CLI to create .env files with environment variables."
 authors = ["Eduardo Cuducos <cuducos@users.noreply.github.com>"]
 license = "BSD-3-Clause"
