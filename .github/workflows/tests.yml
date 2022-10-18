@@ -1,7 +1,7 @@
 name: Tests
 on: [push, pull_request]
 jobs:
-  build:
+  test-py:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -17,3 +17,10 @@ jobs:
           python_version: 3.9
           poetry_version: 1.1.12
           args: run pytest
+  test-rs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Run tests
+        uses: icepuma/rust-action@master
+        run: cargo test
