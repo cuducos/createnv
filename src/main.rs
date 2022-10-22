@@ -99,6 +99,26 @@ impl Variable for VariableWithRandomValue {
     }
 }
 
+struct Block {
+    title: Comment,
+    description: Option<Comment>,
+    variables: Vec<Box<dyn Variable>>,
+}
+
+impl Block {
+    fn as_string(&self) -> String {
+        let mut lines: Vec<String> = vec![self.title.as_string()];
+        match &self.description {
+            Some(desc) => lines.push(desc.as_string()),
+            None => (),
+        }
+        for variable in &self.variables {
+            lines.push(variable.as_string());
+        }
+        lines.join("\n")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -178,6 +198,32 @@ mod tests {
         assert!(suffix.chars().count() <= 128);
         let prefix = got.strip_suffix(suffix).unwrap();
         assert_eq!(prefix, "ANSWER=")
+    }
+
+    #[test]
+    fn test_block_with_description() {
+        let title = Comment {
+            contents: "42".to_string(),
+        };
+        let description = Some(Comment {
+            contents: "Fourty-two".to_string(),
+        });
+        let variable1 = Box::new(SimpleVariable {
+            name: "ANSWER".to_string(),
+            input: "42".to_string(),
+        }) as Box<dyn Variable>;
+        let variable2 = Box::new(SimpleVariable {
+            name: "AS_TEXT".to_string(),
+            input: "fourty two".to_string(),
+        }) as Box<dyn Variable>;
+        let variables = vec![variable1, variable2];
+        let block = Block {
+            title,
+            description,
+            variables,
+        };
+        let got = block.as_string();
+        assert_eq!(got, "# 42\n# Fourty-two\nANSWER=42\nAS_TEXT=fourty two")
     }
 }
 
