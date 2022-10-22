@@ -4,11 +4,11 @@ use std::collections::HashMap;
 const DEFAULT_RANDOM_CHARS: &str =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*(-_=+)";
 
-struct Title {
+struct Comment {
     contents: String,
 }
 
-impl Title {
+impl Comment {
     fn as_string(&self) -> String {
         format!("# {}", self.contents)
     }
@@ -105,7 +105,7 @@ mod tests {
 
     #[test]
     fn test_title() {
-        let line = Title {
+        let line = Comment {
             contents: "Fourty-two".to_string(),
         };
         assert_eq!(line.as_string(), "# Fourty-two")
