@@ -20,7 +20,8 @@ jobs:
   test-rs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Run tests
-        uses: icepuma/rust-action@master
-        run: cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
