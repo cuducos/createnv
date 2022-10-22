@@ -9,7 +9,7 @@ struct Comment {
 }
 
 impl Comment {
-    fn as_string(&self) -> String {
+    fn to_string(&self) -> String {
         format!("# {}", self.contents)
     }
 }
@@ -17,7 +17,7 @@ impl Comment {
 trait Variable {
     fn key(&self) -> String;
     fn value(&self) -> String;
-    fn as_string(&self) -> String {
+    fn to_string(&self) -> String {
         format!("{}={}", self.key(), self.value())
     }
 }
@@ -106,14 +106,14 @@ struct Block {
 }
 
 impl Block {
-    fn as_string(&self) -> String {
-        let mut lines: Vec<String> = vec![self.title.as_string()];
+    fn to_string(&self) -> String {
+        let mut lines: Vec<String> = vec![self.title.to_string()];
         match &self.description {
-            Some(desc) => lines.push(desc.as_string()),
+            Some(desc) => lines.push(desc.to_string()),
             None => (),
         }
         for variable in &self.variables {
-            lines.push(variable.as_string());
+            lines.push(variable.to_string());
         }
         lines.join("\n")
     }
@@ -128,7 +128,7 @@ mod tests {
         let line = Comment {
             contents: "Fourty-two".to_string(),
         };
-        assert_eq!(line.as_string(), "# Fourty-two")
+        assert_eq!(line.to_string(), "# Fourty-two")
     }
 
     #[test]
@@ -137,7 +137,7 @@ mod tests {
             name: "ANSWER".to_string(),
             input: "42".to_string(),
         };
-        assert_eq!(line.as_string(), "ANSWER=42")
+        assert_eq!(line.to_string(), "ANSWER=42")
     }
 
     #[test]
@@ -147,7 +147,7 @@ mod tests {
             default: "42".to_string(),
             input: None,
         };
-        assert_eq!(line.as_string(), "ANSWER=42")
+        assert_eq!(line.to_string(), "ANSWER=42")
     }
 
     #[test]
@@ -157,7 +157,7 @@ mod tests {
             default: "42".to_string(),
             input: Some("Fourty-two".to_string()),
         };
-        assert_eq!(line.as_string(), "ANSWER=Fourty-two")
+        assert_eq!(line.to_string(), "ANSWER=Fourty-two")
     }
 
     #[test]
@@ -170,7 +170,7 @@ mod tests {
             pattern: "{first}-{second}".to_string(),
             settings,
         };
-        assert_eq!(line.as_string(), "ANSWER=Fourty-two")
+        assert_eq!(line.to_string(), "ANSWER=Fourty-two")
     }
 
     #[test]
@@ -179,7 +179,7 @@ mod tests {
             name: "ANSWER".to_string(),
             length: Some(42),
         };
-        let got = line.as_string();
+        let got = line.to_string();
         let suffix = got.strip_prefix("ANSWER=").unwrap();
         assert_eq!(suffix.chars().count(), 42);
         let prefix = got.strip_suffix(suffix).unwrap();
@@ -192,7 +192,7 @@ mod tests {
             name: "ANSWER".to_string(),
             length: None,
         };
-        let got = line.as_string();
+        let got = line.to_string();
         let suffix = got.strip_prefix("ANSWER=").unwrap();
         assert!(suffix.chars().count() >= 64);
         assert!(suffix.chars().count() <= 128);
@@ -222,7 +222,7 @@ mod tests {
             description,
             variables,
         };
-        let got = block.as_string();
+        let got = block.to_string();
         assert_eq!(got, "# 42\n# Fourty-two\nANSWER=42\nAS_TEXT=fourty two")
     }
 }
