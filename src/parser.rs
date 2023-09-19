@@ -1,53 +1,94 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader, BufWriter, Stdout, Write};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+    path::PathBuf,
+};
 
 use anyhow::Result;
 
-use crate::model::Block;
+enum CharType {
+    Char(char),
+    Eol,
+    Eof,
+}
+
+struct CharReader {
+    line: usize,
+    column: usize,
+    current_line: Option<String>,
+    reader: BufReader<File>,
+    done: bool,
+}
+
+impl CharReader {
+    fn new(path: PathBuf) -> Result<Self> {
+        Ok(Self {
+            line: 0,
+            column: 0,
+            current_line: None,
+            done: false,
+            reader: BufReader::new(File::open(path)?),
+        })
+    }
+
+    fn next(&mut self) -> Result<CharType> {
+        if self.done {
+            return Ok(CharType::Eof);
+        }
+        match &self.current_line {
+            None => {
+                let mut buffer = "".to_string();
+                let size = self.reader.read_line(&mut buffer)?;
+                if size == 0 {
+                    self.done = true;
+                    return Ok(CharType::Eof);
+                }
+                self.current_line = Some(buffer.clone());
+                self.line += 1;
+                self.column = 0;
+                self.next()
+            }
+            Some(line) => match line.chars().nth(self.column) {
+                Some(char) => match char {
+                    '\n' => {
+                        self.current_line = None;
+                        Ok(CharType::Eol)
+                    }
+                    _ => {
+                        self.column += 1;
+                        Ok(CharType::Char(char))
+                    }
+                },
+                None => {
+                    self.current_line = None;
+                    Ok(CharType::Eol)
+                }
+            },
+        }
+    }
+}
 
 pub struct Parser {
-    writer: BufWriter<Stdout>,
-
-    buffer: Option<String>,
-    block: Option<Block>,
-
-    written: bool,
+    reader: CharReader,
 }
 
 impl Parser {
-    pub fn new(writer: BufWriter<Stdout>) -> Self {
-        Self {
-            writer,
-            buffer: None,
-            block: None,
-            written: false,
-        }
+    pub fn new(path: PathBuf) -> Result<Self> {
+        Ok(Self {
+            reader: CharReader::new(path)?,
+        })
     }
 
-    fn parse_line(&mut self, line: String) -> Result<()> {
-        self.buffer = Some(line);
-         println!("{}", self.buffer.as_ref().unwrap_or(&"".to_string()));
-        Ok(())
-    }
-
-    pub fn parse(&mut self, path: String) -> Result<()> {
-        let file = File::open(path)?;
-        let reader = BufReader::new(file);
-        for line in reader.lines() {
-            self.parse_line(line?)?;
-        }
-        self.save_block()?;
-        Ok(())
-    }
-
-    fn save_block(&mut self) -> Result<()> {
-        if let Some(block) = &self.block {
-            if self.written {
-                write!(self.writer, "\n\n")?;
+    pub fn parse(&mut self) -> Result<()> {
+        let mut copy = "".to_string();
+        loop {
+            match self.reader.next()? {
+                CharType::Char(char) => copy.push(char),
+                CharType::Eol => copy += "\n",
+                CharType::Eof => break,
             }
-            write!(self.writer, "{block}")?;
-            self.block = None;
         }
+        println!("{}", copy);
         Ok(())
     }
 }
