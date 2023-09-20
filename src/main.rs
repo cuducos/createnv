@@ -13,8 +13,10 @@ mod parser;
 
 fn main() -> Result<()> {
     if let Some(path) = args().nth(1) {
-        let mut parser = Parser::new(PathBuf::from(path))?;
-        parser.parse()?;
+        let mut parser = Parser::new(PathBuf::from(&path))?;
+        for block in parser.parse()? {
+            println!("{block}");
+        }
         return Ok(());
     }
 
