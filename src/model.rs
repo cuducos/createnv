@@ -1,6 +1,7 @@
-use rand::{thread_rng, Rng};
 use std::collections::HashMap;
 use std::fmt;
+
+use rand::{thread_rng, Rng};
 
 const DEFAULT_RANDOM_CHARS: &str =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*(-_=+)";

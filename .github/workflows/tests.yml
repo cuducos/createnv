@@ -5,8 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo fmt --check
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: cargo +nightly fmt --check
   clippy:
     runs-on: ubuntu-latest
     steps:

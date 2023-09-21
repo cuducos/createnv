@@ -112,7 +112,6 @@ impl Tokenizer {
     }
 }
 
-// TODO: move to tests/ as integration test?
 #[cfg(test)]
 mod tests {
     use super::*;
