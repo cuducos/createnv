@@ -22,7 +22,10 @@ fn main() -> Result<()> {
         }
 
         let mut tokenizer = Tokenizer::new(PathBuf::from(&path))?;
-        println!("{:?}", tokenizer.tokenize()?);
+        let tokens = tokenizer.tokenize()?;
+        for token in &tokens {
+            println!("{}: {:?}", token.error_prefix(&path), token);
+        }
         return Ok(());
     }
 
