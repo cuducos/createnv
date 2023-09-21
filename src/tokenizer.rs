@@ -5,7 +5,7 @@ use anyhow::Result;
 use crate::reader::{CharReader, CharType};
 
 #[derive(Debug, PartialEq)]
-pub enum Token {
+enum Token {
     Text(usize, usize, String),
     CommentMark(usize, usize),
     HelpMark(usize, usize),
@@ -13,7 +13,7 @@ pub enum Token {
 }
 
 impl Token {
-    pub fn error_prefix(&self, path: &String) -> String {
+    fn error_prefix(&self, path: &String) -> String {
         let (line, column) = match self {
             Token::Text(x, y, _) => (x, y),
             Token::CommentMark(x, y) => (x, y),
@@ -25,7 +25,7 @@ impl Token {
     }
 }
 
-pub struct Tokenizer {
+struct Tokenizer {
     reader: CharReader,
 }
 
@@ -99,7 +99,7 @@ impl Tokenizer {
     }
 
     // TODO: make iterator?
-    pub fn tokenize(&mut self) -> Result<Vec<Token>> {
+    fn tokenize(&mut self) -> Result<Vec<Token>> {
         let mut tokens: Vec<Token> = vec![];
         loop {
             let new_tokens = self.next_tokens()?;
@@ -170,4 +170,14 @@ mod tests {
         assert_eq!(tokens[17], Token::EqualSign(6, 9));
         assert_eq!(tokens[18], Token::Text(6, 10, "<random:16>".to_string()));
     }
+}
+
+// TODO: remove (just written for manual tests * debug)
+pub fn tokenize_cli(path: &String) -> Result<()> {
+    let mut tokenizer = Tokenizer::new(PathBuf::from(path))?;
+    for token in tokenizer.tokenize()? {
+        println!("{}: {:?}", token.error_prefix(path), token);
+    }
+
+    Ok(())
 }

@@ -4,7 +4,7 @@ use std::{
     path::PathBuf,
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 
 #[derive(PartialEq, Eq)]
 pub enum CharType {
@@ -16,7 +16,6 @@ pub enum CharType {
 pub struct CharReader {
     pub line: usize,
     pub column: usize,
-    path: String,
     current_line: Option<String>,
     reader: BufReader<File>,
     done: bool,
@@ -27,23 +26,10 @@ impl CharReader {
         Ok(Self {
             line: 0,
             column: 0,
-            path: path.display().to_string(),
             current_line: None,
             done: false,
             reader: BufReader::new(File::open(path)?),
         })
-    }
-
-    pub fn error(&self, character: &CharType, details: Option<String>) -> anyhow::Error {
-        let prefix = format!("{}:{}:{}", self.path, self.line, self.column);
-        let extra = details.map_or("".to_string(), |msg| format!(": {msg}"));
-        let token = match &character {
-            CharType::Char(char) => format!("character `{char}`"),
-            CharType::Eol => "EOL (end of line)".to_string(),
-            CharType::Eof => "EOF (end of file)".to_string(),
-        };
-
-        anyhow!(format!("{prefix}: Unexpected {token}{extra}"))
     }
 
     pub fn next(&mut self) -> Result<CharType> {
