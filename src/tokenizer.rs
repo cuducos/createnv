@@ -27,12 +27,14 @@ impl Token {
 
 struct Tokenizer {
     reader: CharReader,
+    buffer: Option<Token>,
 }
 
 impl Tokenizer {
     pub fn new(path: PathBuf) -> Result<Self> {
         Ok(Self {
             reader: CharReader::new(path)?,
+            buffer: None,
         })
     }
 
@@ -60,17 +62,17 @@ impl Tokenizer {
         Token::HelpMark(self.reader.line, self.reader.column - 2)
     }
 
-    fn next_tokens(&mut self) -> Result<Vec<Token>> {
+    fn next_tokens(&mut self) -> Result<(Option<Token>, Option<Token>)> {
         let mut buffer = "".to_string();
         loop {
             let char = self.reader.next()?;
             match char {
-                CharType::Eof => return Ok(vec![]),
+                CharType::Eof => return Ok((None, None)),
                 CharType::Eol => {
                     if buffer.is_empty() {
                         continue;
                     }
-                    return Ok(vec![self.text(buffer, true, false)]);
+                    return Ok((Some(self.text(buffer, true, false)), None));
                 }
                 CharType::Char(c) => {
                     let mut token: Option<Token> = None;
@@ -88,27 +90,35 @@ impl Tokenizer {
                     }
                     if let Some(t) = token {
                         if buffer.is_empty() {
-                            return Ok(vec![t]);
+                            return Ok((Some(t), None));
                         }
-                        return Ok(vec![self.text(buffer, false, prepends_help), t]);
+                        return Ok((Some(self.text(buffer, false, prepends_help)), Some(t)));
                     }
                     buffer.push(c)
                 }
             }
         }
     }
+}
 
-    // TODO: make iterator?
-    fn tokenize(&mut self) -> Result<Vec<Token>> {
-        let mut tokens: Vec<Token> = vec![];
-        loop {
-            let new_tokens = self.next_tokens()?;
-            if new_tokens.is_empty() {
-                break;
-            }
-            tokens.extend(new_tokens);
+impl Iterator for Tokenizer {
+    type Item = Result<Token>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(token) = self.buffer.take() {
+            return Some(Ok(token));
         }
-        Ok(tokens)
+
+        match self.next_tokens() {
+            Ok((Some(first), Some(second))) => {
+                self.buffer = Some(second);
+                Some(Ok(first))
+            }
+            Ok((Some(token), None)) => Some(Ok(token)),
+            Ok((None, Some(token))) => Some(Ok(token)),
+            Ok((None, None)) => None,
+            Err(e) => Some(Err(e)),
+        }
     }
 }
 
@@ -119,8 +129,8 @@ mod tests {
     #[test]
     fn test_tokenizer() {
         let sample = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(".env.sample");
-        let mut tokenizer = Tokenizer::new(sample).unwrap();
-        let tokens = tokenizer.tokenize().unwrap();
+        let tokenizer = Tokenizer::new(sample).unwrap();
+        let tokens: Vec<Token> = tokenizer.map(|t| t.unwrap()).collect();
         assert_eq!(tokens.len(), 19);
 
         // line 1
@@ -172,11 +182,16 @@ mod tests {
     }
 }
 
-// TODO: remove (just written for manual tests * debug)
+// TODO: remove (just written for manual tests & debug)
 pub fn tokenize_cli(path: &String) -> Result<()> {
-    let mut tokenizer = Tokenizer::new(PathBuf::from(path))?;
-    for token in tokenizer.tokenize()? {
-        println!("{}: {:?}", token.error_prefix(path), token);
+    for token in Tokenizer::new(PathBuf::from(path))? {
+        println!("{:?}", token?);
+    }
+    if let Some(token) = Tokenizer::new(PathBuf::from(path))?.next() {
+        println!(
+            "\nThe error prefix looks like:\n{}",
+            token?.error_prefix(path)
+        );
     }
 
     Ok(())
