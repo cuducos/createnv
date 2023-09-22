@@ -1,19 +1,22 @@
 name: Tests
 on: [push, pull_request]
 jobs:
-  build:
+  fmt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: Install dependencies
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: 3.9
-          poetry_version: 1.1.12
-          args: install
-      - name: Run tests
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: 3.9
-          poetry_version: 1.1.12
-          args: run pytest
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: rustup component add rustfmt
+      - run: cargo +nightly fmt --check
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo clippy
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test

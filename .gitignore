@@ -1,9 +1,2 @@
-*.pyc
-.coverage
 .env
-.mypy_cache/
-.tox/
-__pycache__/
-createnv.egg-info/
-dist/
-htmlcov/
+target/
