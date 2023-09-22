@@ -5,7 +5,7 @@ use anyhow::Result;
 use crate::reader::{CharReader, CharType};
 
 #[derive(Debug, PartialEq)]
-enum Token {
+pub enum Token {
     Text(usize, usize, String),
     CommentMark(usize, usize),
     HelpMark(usize, usize),
@@ -13,7 +13,7 @@ enum Token {
 }
 
 impl Token {
-    fn error_prefix(&self, path: &String) -> String {
+    pub fn error_prefix(&self, path: &String) -> String {
         let (line, column) = match self {
             Token::Text(x, y, _) => (x, y),
             Token::CommentMark(x, y) => (x, y),
@@ -25,7 +25,7 @@ impl Token {
     }
 }
 
-struct Tokenizer {
+pub struct Tokenizer {
     reader: CharReader,
     buffer: Option<Token>,
 }
