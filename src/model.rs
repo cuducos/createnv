@@ -6,6 +6,7 @@ use std::{
 };
 
 use anyhow::Result;
+use colored::Colorize;
 
 #[derive(Clone)]
 pub struct Comment {
@@ -56,9 +57,9 @@ impl SimpleVariable {
             .map(|has_punctuation| if has_punctuation { "" } else { ":" })
             .unwrap_or(":");
         match (&self.help, &self.default) {
-            (Some(h), Some(d)) => print!("{} [{}]{} ", h, d, colon),
+            (Some(h), Some(d)) => print!("{} {}", h, format!("[{}]{} ", d, colon).dimmed()),
             (Some(h), None) => print!("{}{} ", h, colon),
-            (None, Some(d)) => print!("{} [{}]: ", self.name, d),
+            (None, Some(d)) => print!("{} {} ", self.name, format!("[{}]", d).dimmed()),
             (None, None) => print!("{}: ", self.name),
         };
 
@@ -175,10 +176,17 @@ impl Block {
         if self.has_input_variables() {
             println!(
                 "\n{}",
-                self.title.to_string().strip_prefix("# ").unwrap_or("")
+                self.title
+                    .to_string()
+                    .strip_prefix("# ")
+                    .unwrap_or("")
+                    .bold()
             );
             if let Some(desc) = &self.description {
-                println!("{}", desc.to_string().strip_prefix("# ").unwrap_or(""));
+                println!(
+                    "{}",
+                    desc.to_string().strip_prefix("# ").unwrap_or("").italic()
+                );
             }
         }
         for variable in &mut self.variables {

@@ -6,4 +6,5 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.86"
 clap = "4.5.16"
+colored = "2.1.0"
 rand = "0.8.5"
