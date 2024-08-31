@@ -1,9 +1,4 @@
-# Createnv 
-
-[![GitHub Actions: Tests](https://github.com/cuducos/createnv/workflows/Tests/badge.svg)]()
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/createnv)](https://pypi.org/project/createnv/)
-[![PyPI](https://img.shields.io/pypi/v/createnv)](https://pypi.org/project/createnv/)
-
+# Createnv [![Tests](https://github.com/cuducos/createnv/actions/workflows/tests.yml/badge.svg)](https://github.com/cuducos/createnv/actions/workflows/tests.yml)
 A simple CLI to create `.env` files.
 
 ## Motivation
@@ -22,10 +17,10 @@ You can now experiment by yourself, or try more advanced `.env.sample` such as t
 
 ## Install
 
-Createnv requires [Python](https://python.org) 3.7 or newer:
+Createnv requires [Rust's `cargo`](https://www.rust-lang.org/tools/install):
 
 ```console
-$ pip install createnv
+$ cargo install --path .
 ```
 
 ## Usage
@@ -38,13 +33,13 @@ $ createnv
 
 ### Options
 
-| Option | Default | Description |
+| Option | Description | Default |
 |---|---|---|
-| `--target` | `.env` | File to write the result |
-| `--source` | `.env.sample` | File to use as a sample |
-| `--overwrite` and `--no-overwrite` | `--no-overwrite` | Whether to ask before overwriting files
-| `--use-default` or `--no-use-default` | `--no-use-default` | Whether to ask for input on fields that have a default value set |
-| `--chars-for-random-string` | All ASCII letters, numbers and a few extra characters (`!@#$%^&*(-_=+)`) | Characters used to create random strings |
+| `--target` | File to write the result | `.env` |
+| `--source` | File to use as a sample | `.env.sample` |
+| `--chars-for-random-string` | Characters used to create random strings | All ASCII letters, numbers and a few extra characters (`!@#$%^&*(-_=+)`) |
+| `--overwrite` | Do not ask before overwriting files | |
+| `--use-default`  | Do not ask for input on fields that have a default value | |
 
 ## Format of sample files
 
@@ -106,7 +101,7 @@ Now it's a complete variable with a name (_NAME_), a default value (_Cuducos_), 
 
 If you want to have a variable with a random value, you can set its default value to `<random>` and Createnv will take care of it. Optionally you can specify how long this variable should be with `:int`.
 
-You can use the [`--chars-for-random-string` option](#options) to specify which characters to be used in the random value.
+You can use the `--chars-for-random-string` option to specify which characters to be used in the random value.
 
 ##### Example
 
