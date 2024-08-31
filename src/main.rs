@@ -1,15 +1,16 @@
 use std::env::args;
 
 use anyhow::Result;
-use createnv::{model_to_text, parser, tokenize};
+use createnv::{model_to_text, parser, DEFAULT_ENV_SAMPLE};
 
 fn main() -> Result<()> {
-    if let Some(path) = args().nth(1) {
-        tokenize(&path)?;
-        parser(&path)?;
-
+    let path = args()
+        .nth(1)
+        .unwrap_or_else(|| DEFAULT_ENV_SAMPLE.to_string());
+    if path == "--debug" {
+        model_to_text()?;
         return Ok(());
     }
-
-    model_to_text()
+    parser(&path)?;
+    Ok(())
 }

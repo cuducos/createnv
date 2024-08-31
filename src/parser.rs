@@ -1,101 +1,85 @@
-use std::path::PathBuf;
-
-use anyhow::{anyhow, Result};
-
-use crate::{
-    model::{Block, Comment},
-    tokenizer::{Token, Tokenizer},
+use std::{
+    fs::File,
+    io::{stdin, BufRead, BufReader},
 };
 
+use anyhow::Result;
+
+use crate::model::{Block, Comment};
+
+enum Expecting {
+    Title,
+    DescriptionOrVariables,
+    Variables,
+}
+
 struct Parser {
-    tokens: Tokenizer,
+    blocks: Vec<Block>,
+    buffer: Option<Block>,
     path: String,
-    previous_token: Option<Token>,
-    current_token: Option<Token>,
+    state: Expecting,
 }
 
 impl Parser {
-    pub fn new(path: &String) -> Result<Self> {
-        Ok(Self {
-            tokens: Tokenizer::new(PathBuf::from(path))?,
-            path: path.clone(),
-            current_token: None,
-            previous_token: None,
-        })
-    }
-
-    fn load_next_token(&mut self) -> Result<()> {
-        self.previous_token = self.current_token.take();
-        match self.tokens.next() {
-            Some(token) => self.current_token = Some(token?),
-            None => self.current_token = None,
+    pub fn new(path: &str) -> Self {
+        Self {
+            blocks: vec![],
+            buffer: None,
+            path: path.to_string(),
+            state: Expecting::Title,
         }
-
-        Ok(())
     }
 
-    fn error(&self, msg: &str) -> anyhow::Error {
-        let prefix = if let Some(curr) = &self.current_token {
-            curr.error_prefix(&self.path)
-        } else if let Some(prev) = &self.previous_token {
-            prev.error_prefix(&self.path)
-        } else {
-            "EOF".to_string()
-        };
-
-        anyhow!("{}: {}", prefix, msg)
-    }
-
-    fn parse_title(&mut self) -> Result<String> {
-        self.load_next_token()?;
-        match self.current_token {
-            Some(Token::CommentMark(_, _)) => (),
-            Some(_) => return Err(self.error("Expected a title line starting with `#`")),
-            None => {
-                return Err(
-                    self.error("Expected a title line starting with `#`, got the end of the file")
-                )
+    pub fn parse(&mut self) -> Result<()> {
+        let reader = BufReader::new(File::open(&self.path)?);
+        for line in reader.lines() {
+            // TODO: empty line => start new block
+            match self.state {
+                Expecting::Title => {
+                    if let Some(txt) = line?.strip_prefix('#') {
+                        self.buffer = Some(Block::new(Comment::new(txt.trim()), None));
+                    }
+                    self.state = Expecting::DescriptionOrVariables;
+                }
+                Expecting::DescriptionOrVariables => {
+                    if let Some(txt) = line?.strip_prefix('#') {
+                        if let Some(b) = self.buffer.as_mut() {
+                            b.description = Some(Comment::new(txt.trim()));
+                        }
+                        self.state = Expecting::Variables;
+                    } else {
+                        // TODO: handle variable line
+                    }
+                }
+                Expecting::Variables => {
+                    // TODO: ,
+                }
             }
         }
-
-        self.load_next_token()?;
-        match &self.current_token {
-            Some(Token::Text(_, _, text)) => Ok(text.clone()),
-            Some(_) => Err(self.error("Expected the text of the title")),
-            None => Err(self.error("Expected the text of the title, got  the end of the file")),
+        if let Some(block) = &self.buffer {
+            self.blocks.push(block.clone());
+            self.buffer = None
         }
+        Ok(())
+    }
+}
+
+// TODO: remove (just written for manual tests & debug)
+pub fn parser_cli(path: &str) -> Result<()> {
+    let mut parser = Parser::new(path);
+    parser.parse()?;
+    for block in &mut parser.blocks {
+        block.resolve(&mut stdin().lock())?;
+        println!("{}", block.as_text()?);
     }
 
-    fn parse_description(&mut self) -> Result<Option<String>> {
-        self.load_next_token()?;
-        match self.current_token {
-            Some(Token::CommentMark(_, _)) => (),
-            Some(_) => return Ok(None),
-            None => return Err(self.error("Expected a descrition line starting with `#` or a variable definition, got the end of the file")),
-        }
-
-        self.load_next_token()?;
-        match &self.current_token {
-            Some(Token::Text(_, _, text)) => Ok(Some(text.clone())),
-            Some(_) => Err(self.error("Expected a descrition text")),
-            None => Err(self.error("Expected a descrition text, got the end of the file")),
-        }
-    }
-
-    pub fn parse(&mut self) -> Result<Vec<Block>> {
-        let mut blocks: Vec<Block> = vec![];
-        let title = Comment::new(self.parse_title()?.as_str());
-        let descrition = self
-            .parse_description()?
-            .map(|desc| Comment::new(desc.as_str()));
-        blocks.push(Block::new(title, descrition));
-
-        Ok(blocks)
-    }
+    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
+    use std::{io::Cursor, path::PathBuf};
+
     use super::*;
 
     #[test]
@@ -104,23 +88,21 @@ mod tests {
             .join(".env.sample")
             .into_os_string()
             .into_string();
-        let parsed = Parser::new(&sample.unwrap()).unwrap().parse().unwrap();
-        let got = parsed
-            .iter()
-            .map(|block| block.to_string())
+        let mut parser = Parser::new(&sample.unwrap());
+        parser.parse().unwrap();
+        let got = parser
+            .blocks
+            .iter_mut()
+            .map(|block| {
+                block.resolve(&mut Cursor::new("foobar")).unwrap();
+                block.as_text().unwrap()
+            })
             .collect::<Vec<String>>()
             .join("\n");
+
+        // TODO: include variables (currently it is just title and description)
         let expected = "# Createnv\n# This is a simple example of how Createnv works".to_string();
+
         assert_eq!(expected, got);
     }
-}
-//
-// TODO: remove (just written for manual tests & debug)
-pub fn parser_cli(path: &String) -> Result<()> {
-    let mut parser = Parser::new(path)?;
-    for block in parser.parse()? {
-        println!("{block}");
-    }
-
-    Ok(())
 }
