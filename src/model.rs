@@ -49,9 +49,15 @@ impl SimpleVariable {
     }
 
     fn resolve<T: BufRead>(&mut self, terminal: &mut T) -> Result<()> {
+        let colon = self
+            .help
+            .as_ref()
+            .map(|txt| txt.ends_with('?') || txt.ends_with(':'))
+            .map(|has_punctuation| if has_punctuation { "" } else { ":" })
+            .unwrap_or(":");
         match (&self.help, &self.default) {
-            (Some(h), Some(d)) => print!("{} [{}]: ", h, d),
-            (Some(h), None) => print!("{}: ", h),
+            (Some(h), Some(d)) => print!("{} [{}]{} ", h, d, colon),
+            (Some(h), None) => print!("{}{} ", h, colon),
             (None, Some(d)) => print!("{} [{}]: ", self.name, d),
             (None, None) => print!("{}: ", self.name),
         };
