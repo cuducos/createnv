@@ -51,6 +51,13 @@ fn main() -> Result<()> {
                 .help("File to write the result"),
         )
         .arg(
+            clap::Arg::new("stdout")
+                .long("stdout")
+                .help("Writes to stdout instead of to a target file")
+                .action(ArgAction::SetTrue)
+                .conflicts_with("target"),
+        )
+        .arg(
             Arg::new("source")
                 .long("source")
                 .short('s')
@@ -80,9 +87,10 @@ fn main() -> Result<()> {
         )
         .get_matches();
 
+    let to_stdout = matches.get_one::<bool>("stdout").unwrap();
     let target = matches.get_one::<String>("target").unwrap();
     let overwrite = matches.get_one::<bool>("overwrite").unwrap();
-    if !overwrite && !should_write_to(target)? {
+    if !to_stdout && !overwrite && !should_write_to(target)? {
         exit(0);
     }
 
@@ -95,7 +103,11 @@ fn main() -> Result<()> {
     let mut parser = Parser::new(source.as_str(), chars, use_default)?;
     parser.parse(&mut stdin().lock())?;
 
-    let mut output = File::create(target)?;
-    output.write_all(parser.to_string().as_bytes())?;
+    if *to_stdout {
+        println!("\n{}", parser);
+    } else {
+        let mut output = File::create(target)?;
+        output.write_all(parser.to_string().as_bytes())?;
+    }
     Ok(())
 }

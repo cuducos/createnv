@@ -38,6 +38,7 @@ $ createnv
 | `--target` | File to write the result | `.env` |
 | `--source` | File to use as a sample | `.env.sample` |
 | `--chars-for-random-string` | Characters used to create random strings | All ASCII letters, numbers and a few extra characters (`!@#$%^&*(-_=+)`) |
+| `--stdout` | Write to `stdout` instead of a file | |
 | `--overwrite` | Do not ask before overwriting files | |
 | `--use-default`  | Do not ask for input on fields that have a default value | |
 
