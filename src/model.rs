@@ -153,7 +153,7 @@ impl Block {
         }
     }
 
-    fn has_auto_input_variables(&self) -> bool {
+    fn has_input_variables(&self) -> bool {
         self.variables
             .iter()
             .any(|v| matches!(v, VariableType::Input(_)))
@@ -166,9 +166,9 @@ impl Block {
     }
 
     pub fn resolve<T: BufRead>(&mut self, terminal: &mut T, use_default: bool) -> Result<()> {
-        if self.has_auto_input_variables() {
+        if self.has_input_variables() {
             println!(
-                "{}",
+                "\n{}",
                 self.title.to_string().strip_prefix("# ").unwrap_or("")
             );
             if let Some(desc) = &self.description {
