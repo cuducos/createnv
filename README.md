@@ -17,7 +17,19 @@ You can now experiment by yourself, or try more advanced `.env.sample` such as t
 
 ## Install
 
-Createnv requires [Rust's `cargo`](https://www.rust-lang.org/tools/install):
+You can download the binary for your platform from the [releases page](https://github.com/cuducos/createnv/releases), for example:
+
+```console
+$ curl -LO https://github.com/cuducos/createnv/releases/download/v0.0.3/createnv-x86_64-unknown-linux-gnu.tar.gz
+$ tar -xzvf createnv-x86_64-unknown-linux-gnu.tar.gz
+$ rm createnv-x86_64-unknown-linux-gnu.tar.gz
+$ chmod a+x createnv 
+$ mv createnv /usr/local/bin/
+```
+
+### Compile from source
+
+It is simple with [Rust's `cargo`](https://www.rust-lang.org/tools/install):
 
 ```console
 $ cargo install --path .
