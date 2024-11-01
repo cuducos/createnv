@@ -7,7 +7,7 @@ edition = "2021"
 lto = true
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.91"
 clap = "4.5.16"
 colored = "2.1.0"
 rand = "0.8.5"
