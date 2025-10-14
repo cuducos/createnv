@@ -8,6 +8,6 @@ lto = true
 
 [dependencies]
 anyhow = "1.0.99"
-clap = "4.5.47"
+clap = "4.5.49"
 colored = "2.1.0"
 rand = "0.9.2"
