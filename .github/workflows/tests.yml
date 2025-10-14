@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - run: rustup component add rustfmt
+      - run: rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
       - run: cargo +nightly fmt --check
   clippy:
     runs-on: ubuntu-latest
